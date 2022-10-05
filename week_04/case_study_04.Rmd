@@ -1,22 +1,29 @@
 ---
 title: "Case Study 04"
-author: Your Name
+author: Yvonne Huang
 date: August 1, 2020
 output: github_document
 ---
 
-## First Header
+## Library
 
-Comments
 
 ```{r}
-summary(cars)
+library(tidyverse)
+library(nycflights13)
 ```
 
-## Second Header
+## Searching for the farest airport
 
-Comments
+First, sort the dataframe by distance. Here we use decensing order, so the first row represent the data with longest distance. Second, silce the first row. By slicing, we can minimize the calculation time in join process. Third, join "dest" in flights and "faa" in airports. Fouth, select the destination name. Finally, change the name from dataframe to charactor.
 
 ```{r}
-plot(pressure)
+farthest_airport <- flights %>%
+  arrange(desc(distance)) %>%
+  slice_head(n = 1) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  select(name) %>%
+  as.character()
+
+farthest_airport  
 ```
