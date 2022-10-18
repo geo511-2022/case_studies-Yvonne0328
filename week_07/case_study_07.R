@@ -1,7 +1,9 @@
 # library(tidyverse)
+# run this first
 library(reprex)
 # library(sf)
 
+# copy these
 library(ggplot2)
 library(spData)
 data(world)
