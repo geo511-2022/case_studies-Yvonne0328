@@ -41,9 +41,8 @@ kable(top_5,
   kable_styling(
     latex_options = c("striped", "scale_down")
     )%>%
-  row_spec(1, color = "red") %>%
-  as_image(width = 10,file = "/Desktop/table.png")
-
+  row_spec(1, color = "red")
+ 
 ```
 
 
@@ -51,7 +50,8 @@ kable(top_5,
 decade <-  data %>%
   mutate(decade = floor(year/10)*10) %>% 
   group_by(decade) %>%
-  slice_max(order_by = mean)
+  slice_max(order_by = mean) %>%
+  arrange(desc(mean))
   
 kable(decade,
       caption = "Top mean CO2 in each decade",
@@ -59,7 +59,8 @@ kable(decade,
   kable_styling(
     latex_options = c("striped", "scale_down")
     )%>%
-  row_spec(1, color = "red") %>%
-  as_image(width = 10,file = "/Desktop/table2.png")
+  row_spec(1, color = "red") 
+  
+
 ```
 
