@@ -30,7 +30,7 @@ This graphic shows word clouds, which indicate what words people use to express 
 
 # Proposed data sources
 
-Sentiment analysis: Twitter Academic API.
+Sentiment analysis: Twitter API.
 Wildfire area: Wildfires burned down area shape files. (https://frap.fire.ca.gov/mapping/gis-data/)
 
 
