@@ -1,12 +1,3 @@
----
-title: "Case Study 11"
-author: Yvonne Huang
-date: August 1, 2020
-output: github_document
----
- 
-# Library
-```{r, message = FALSE}
 library(tidyverse)
 library(spData)
 library(sf)
@@ -20,22 +11,16 @@ getDoParWorkers() # check registered cores
 
 library(tidycensus)
 census_api_key("XXXXXX")
-```
-```{r}
+library(tidycensus)
 racevars <- c(White = "P005003", 
               Black = "P005004", 
               Asian = "P005006", 
               Hispanic = "P004003")
+
 options(tigris_use_cache = TRUE)
 erie <- get_decennial(geography = "block", variables = racevars, 
-                      state = "NY", county = "Erie County", 
-                      geometry = TRUE,
+                      state = "NY", county = "Erie County", geometry = TRUE,
                       summary_var = "P001001", cache_table=T) 
-```
-
-# Crop and for loop
-crop the data, then use for loop to filter, sample, combine them into one sf, and mutate.(each race)
-```{r}
 crop <- st_crop(erie, c(xmin=-78.9,xmax=-78.85,ymin=42.888,ymax=42.92))
 
 # crop$variable=as.factor((crop$variable))
@@ -47,12 +32,7 @@ point <- foreach(i = 1:4,.combine=rbind)  %do%
       st_sample(size=.$value) %>% 
       st_as_sf() %>% 
       mutate(variable=unique(crop$variable)[i])
+    
   }
-```
- 
-# Map
-```{r}
+
 mapview(point,zcol='variable',cex=1,alpha=0)
-```
- 
- 

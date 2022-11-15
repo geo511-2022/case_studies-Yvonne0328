@@ -18,11 +18,12 @@ lst_url="https://github.com/adammwilson/DataScienceData/blob/master/inst/extdata
 # download them
 download.file(lulc_url,destfile="data/MCD12Q1.051_aid0001.nc", mode="wb")
 download.file(lst_url,destfile="data/MOD11A2.006_aid0001.nc", mode="wb")
+
 lulc=stack("data/MCD12Q1.051_aid0001.nc",varname="Land_Cover_Type_1")
 lst=stack("data/MOD11A2.006_aid0001.nc",varname="LST_Day_1km")
-plot(lulc)
+# plot(lulc)
 lulc=lulc[[13]]
-plot(lulc)
+
 
 
 Land_Cover_Type_1 = c(
@@ -74,12 +75,13 @@ lst=setZ(lst,tdates)
 
 # PART 1 
 lw = SpatialPoints(data.frame(x= -78.791547,y=43.007211))
-crs(lw) <- projection("+proj=longlat")
-lw %>%
-  spTransform(crs(lulc))
+projection(lw) <- "+proj=longlat"
+lw = spTransform(lw, CRSobj = crs(lst, asText = TRUE))
 lst_transpose <- t(raster::extract(lst,lw,buffer=1000,fun=mean,na.rm=T) )
+
 part1 <- data.frame(getZ(lst), lst_transpose)
 colnames(part1) <- c("date", "value") 
+
 graphics.off()
 ggplot(part1, aes(date, value))+
   geom_point()+
@@ -91,13 +93,12 @@ lst_month <- stackApply(lst,tmonth , fun = mean)
 names(lst_month)=month.name
 gplot(lst_month)+
   geom_raster(aes(fill = value))
-  
 cellStats(lst_month,mean)
 
 
 #PART 3 
-resample(lcd, lst, method="ngb")
-lcds1=cbind.data.frame(
+lulc2 = resample(lulc, lst, method="ngb")
+lcds1 = cbind.data.frame(
   values(lst_month),
   ID=values(lulc2[[1]]))%>%
   na.omit() %>%
@@ -105,5 +106,9 @@ lcds1=cbind.data.frame(
   mutate(ID=as.numeric(ID)) %>%
   mutate(month=factor(month,levels=month.name,ordered=T)) %>%
   inner_join(lcd) %>%
-  filter(landcover%in%c("Urban & built-up","Deciduous Broadleaf forest"))
+  filter(landcover%in%c("Urban & built-up","Deciduous Broadleaf forest"))%>%
+ggplot()+
+  geom_point(aes(month,value))+
+  theme_bw()+
+  facet_wrap(~landcover)
 
