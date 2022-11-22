@@ -1,25 +1,14 @@
----
-title: "Case Study 09"
-author: Yvonne Huang
-date: Nov 1, 2022
-output: github_document
----
-## library
-```{r,results='hide',message=FALSE}
+# packages
 library(sf)
 library(tidyverse)
 library(ggmap)
 library(rnoaa)
 library(spData)
 library(kableExtra)
-```
 
-## data
-```{r,results='hide',message=FALSE}
 # data - polygon
 data(world)
 data(us_states)
-
 
 # data - storm
 # Download zipped data from noaa with storm track information
@@ -29,10 +18,7 @@ tdir=tempdir()
 download.file(dataurl,destfile=file.path(tdir,"temp.zip"))
 unzip(file.path(tdir,"temp.zip"),exdir = tdir) #unzip the compressed folder
 storm_data <- read_sf(list.files(tdir,pattern=".shp",full.names = T))
-```
 
-# data processing
-```{r,results='hide',message=FALSE}
 storms <- storm_data %>%
   filter(SEASON >= 1950) %>%
   mutate_if(is.numeric, function(x) ifelse(x==-999.0,NA,x)) %>%
@@ -40,19 +26,13 @@ storms <- storm_data %>%
 
 region <- storms %>%
   st_bbox()
-```
 
-# plots
-```{r}
 ggplot(storms)+
   facet_wrap(~decade)+
   stat_bin2d(data=storms, aes(y=st_coordinates(storms)[,2], x=st_coordinates(storms)[,1]),bins=100)+
   scale_fill_distiller(palette="YlOrRd", trans="log", direction=-1, breaks = c(1,10,100,1000))+
   coord_sf(ylim=region[c(2,4)], xlim=region[c(1,3)])
-```
 
-## tables
-```{r}
 # tables
 us_states <-  us_states %>%
   st_transform(crs = st_crs(storms))%>%
@@ -62,12 +42,10 @@ table <- storm_states %>%
   group_by(state) %>%
   summarize(storms=length(unique(NAME))) %>%
   arrange(desc(storms)) %>%
-  slice(1:5) %>%
+  slice(1:5)%>%
   select(c("state", "storms"))%>%
   st_set_geometry(NULL)
-```
-# table visualization
-```{r}
+
 kable(table,
       caption = "Five states that have experienced the most storms",
       col.names = c("state", "storms")) %>%
@@ -75,6 +53,3 @@ kable(table,
     latex_options = c("striped", "scale_down")
   )%>%
   row_spec(1, color = "red") 
-```
-
-

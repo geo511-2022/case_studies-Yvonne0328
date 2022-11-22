@@ -1,49 +1,26 @@
----
-title: "Case Study 05"
-author: Yvonne Huang
-date: October 5, 2022
-output: github_document
----
- 
-### Library
-
-```{r message = FALSE}
-# knitr::opts_chunk$set(echo = TRUE)
 library(spData)
 library(sf)
 library(tidyverse)
 library(units) 
 
-```
-
-### Data
-
-read datasets: world and us_states
-
-```{r message = FALSE}
 data(world) 
 data(us_states)
-```
+# plot(world[1])
+# plot(us_states[1])
 
-### Dataset
-
-"albers" is the crs of the dataset. When doing intersection (or clipping...), always remember to project dataset into the SAME crs by useing "st_transform".
-
-```{r message = FALSE}
+# step 1: world
 albers="+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 canada <- world %>%
   st_transform(albers)%>%
   filter(name_long == "Canada") %>%
   st_buffer(dist = 10000)
 
+#step 2: us
 NY <- us_states %>%
   st_transform(albers)%>%
   filter(NAME == "New York")
-```
 
-### Border
-
-```{r, include=TRUE}
+#step 3:border
 border <- st_intersection(canada, NY)
 
 ggplot()+
@@ -53,5 +30,3 @@ ggplot()+
 
 AREA <- st_area(border)  %>% set_units(km^2)
 AREA
-
-```

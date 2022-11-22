@@ -1,21 +1,21 @@
----
-title: "Case Study 09"
-author: Yvonne Huang
-date: Nov 1, 2022
-output: github_document
----
+Case Study 09
+================
+Yvonne Huang
+Nov 1, 2022
+
 ## library
-```{r,results='hide',message=FALSE}
+
+``` r
 library(sf)
 library(tidyverse)
 library(ggmap)
 library(rnoaa)
 library(spData)
-library(kableExtra)
 ```
 
 ## data
-```{r,results='hide',message=FALSE}
+
+``` r
 # data - polygon
 data(world)
 data(us_states)
@@ -32,7 +32,8 @@ storm_data <- read_sf(list.files(tdir,pattern=".shp",full.names = T))
 ```
 
 # data processing
-```{r,results='hide',message=FALSE}
+
+``` r
 storms <- storm_data %>%
   filter(SEASON >= 1950) %>%
   mutate_if(is.numeric, function(x) ifelse(x==-999.0,NA,x)) %>%
@@ -43,7 +44,8 @@ region <- storms %>%
 ```
 
 # plots
-```{r}
+
+``` r
 ggplot(storms)+
   facet_wrap(~decade)+
   stat_bin2d(data=storms, aes(y=st_coordinates(storms)[,2], x=st_coordinates(storms)[,1]),bins=100)+
@@ -51,8 +53,11 @@ ggplot(storms)+
   coord_sf(ylim=region[c(2,4)], xlim=region[c(1,3)])
 ```
 
+![](case_study_09_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
 ## tables
-```{r}
+
+``` r
 # tables
 us_states <-  us_states %>%
   st_transform(crs = st_crs(storms))%>%
@@ -62,19 +67,5 @@ table <- storm_states %>%
   group_by(state) %>%
   summarize(storms=length(unique(NAME))) %>%
   arrange(desc(storms)) %>%
-  slice(1:5) %>%
-  select(c("state", "storms"))%>%
-  st_set_geometry(NULL)
+  slice(1:5)
 ```
-# table visualization
-```{r}
-kable(table,
-      caption = "Five states that have experienced the most storms",
-      col.names = c("state", "storms")) %>%
-  kable_styling(
-    latex_options = c("striped", "scale_down")
-  )%>%
-  row_spec(1, color = "red") 
-```
-
-

@@ -1,11 +1,3 @@
----
-title: "Case Study 10"
-author: Yvonne Huang
-date: August 1, 2020
-output: github_document
----
-# library
-```{r}
 library(raster)
 library(rasterVis)
 library(rgdal)
@@ -16,19 +8,14 @@ library(knitr)
 # New Packages
 library(ncdf4) # to import data from netcdf format
 
-```
-
 
 # Create afolder to hold the downloaded data
-```{r}
 dir.create("data",showWarnings = F) #create a folder to hold the data
 
 lulc_url="https://github.com/adammwilson/DataScienceData/blob/master/inst/extdata/appeears/MCD12Q1.051_aid0001.nc?raw=true"
 lst_url="https://github.com/adammwilson/DataScienceData/blob/master/inst/extdata/appeears/MOD11A2.006_aid0001.nc?raw=true"
-```
 
 # download them
-```{r}
 download.file(lulc_url,destfile="data/MCD12Q1.051_aid0001.nc", mode="wb")
 download.file(lst_url,destfile="data/MOD11A2.006_aid0001.nc", mode="wb")
 
@@ -67,15 +54,12 @@ lcd=data.frame(
   stringsAsFactors = F)
 # colors from https://lpdaac.usgs.gov/about/news_archive/modisterra_land_cover_types_yearly_l3_global_005deg_cmg_mod12c1
 kable(head(lcd))
-```
+
 
 # convert to raster (easy)
-```{r}
 lulc=as.factor(lulc)
-```
 
 # update the RAT with a left join
-```{r}
 levels(lulc)=left_join(levels(lulc)[[1]],lcd)
 
 
@@ -89,9 +73,7 @@ tdates=names(lst)%>%
 names(lst)=1:nlayers(lst)
 lst=setZ(lst,tdates)
 
-```
 # PART 1 
-```{r}
 lw = SpatialPoints(data.frame(x= -78.791547,y=43.007211))
 projection(lw) <- "+proj=longlat"
 lw = spTransform(lw, CRSobj = crs(lst, asText = TRUE))
@@ -104,31 +86,29 @@ graphics.off()
 ggplot(part1, aes(date, value))+
   geom_point()+
   geom_smooth(n = 100, span = 0.01)
-```
+
 # PART2
-```{r}
 tmonth <- as.numeric(format(getZ(lst),"%m"))
 lst_month <- stackApply(lst,tmonth , fun = mean)
 names(lst_month)=month.name
 gplot(lst_month)+
   geom_raster(aes(fill = value))
 cellStats(lst_month,mean)
-```
+
 
 #PART 3 
-```{r}
 lulc2 = resample(lulc, lst, method="ngb")
-
-lcds1=cbind.data.frame(
-values(lst_month),
-ID=values(lulc2[[1]]))%>%
-na.omit()
-temp=lcds1%>%gather(key='month',value='value',-ID)
-temp=temp%>%mutate(ID=as.numeric(ID),month=factor(month,levels=month.name,ordered=T))
-result=left_join(temp,lcd,by='ID')%>%filter(landcover %in% c('Urban & built-up','Deciduous Broadleaf forest'))
-ggplot(result)+
+lcds1 = cbind.data.frame(
+  values(lst_month),
+  ID=values(lulc2[[1]]))%>%
+  na.omit() %>%
+  gather(key='month',value='value',-ID) %>%
+  mutate(ID=as.numeric(ID)) %>%
+  mutate(month=factor(month,levels=month.name,ordered=T)) %>%
+  inner_join(lcd) %>%
+  filter(landcover%in%c("Urban & built-up","Deciduous Broadleaf forest"))%>%
+ggplot()+
   geom_point(aes(month,value))+
   theme_bw()+
   facet_wrap(~landcover)
 
-```
